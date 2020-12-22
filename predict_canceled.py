@@ -84,20 +84,18 @@ class DataReader(object):
         # add weekday, weekend column
 
         # return new df
-        df_multiday = df_train[df_train["total_days"] > 1]
-        df_train = df_train[df_train["total_days"] == 1]
-        df_multiday = df_multiday.rename(columns={"arrival_date_year":"year", "arrival_date_month":"month", "arrival_date_day_of_month":"day"})
         df_train = df_train.rename(columns={"arrival_date_year":"year", "arrival_date_month":"month", "arrival_date_day_of_month":"day"})
-        df_multiday["date"] = pd.to_datetime(df_multiday[["year","month","day"]])
         df_train["date"] = pd.to_datetime(df_train[["year","month","day"]])
-        print(df_multiday)
-        df_temp = pd.DataFrame(columns=["adults", "children", "babies", "total_of_special_requests", "total_days", "date"])
-        for idx, row in df_multiday.iterrows():
-            for d in range(row["total_days"]):
-                r = row
-                r.at["date"] = row["date"] + timedelta(days=d)
-                # print(r)
-                df_temp.append(r)
+        df_train.drop(columns = ["year","month","day"])
+        print(df_train)
+        df_temp = pd.DataFrame(columns=["adults","children","babies","total_of_special_requests","total_days","date"])
+        for idx, row in df_train.iterrows():
+            if row["total_days"] > 1:
+                for d in range(row["total_days"]):
+                    r = row
+                    r.at["date"] = row["date"] + timedelta(days=d)
+                    r.at["total_days"] = 1
+                    df_temp = pd.concat([r.to_frame().transpose(), df_temp], ignore_index=True)
         print(df_temp)
         
 
