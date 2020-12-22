@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-from libsvm.svmutil import *
-import calendar
+from datetime import timedelta
+# from libsvm.svmutil import *
 class DataReader(object):    
     def __init__(self,trainFile,testFile,notinclude,drop_canceled,notoneHot):
         self.trainRow = pd.read_csv(trainFile)
@@ -59,7 +59,7 @@ class DataReader(object):
         df_train = df_train.drop(columns=cols_to_sum)
         df_test = df_test.drop(columns=cols_to_sum)
         # string month to int
-        month_dict = {  'Janauary':1,
+        month_dict = {  'January':1,
                         'February':2,
                         'March':3,
                         'April':4,
@@ -73,17 +73,33 @@ class DataReader(object):
                         'December':12	}
         df_train =  df_train.replace({'arrival_date_month':month_dict})
         df_test = df_test.replace({'arrival_date_month':month_dict})
-        print(df_train)
-        print(df_test)
+        # print(df_train)
+        # print(df_test)
         # add rows based on per day
-        for index, row in df_train.iterrows():
-            if index == 0:
-                print(row)
+        # for index, row in df_train.iterrows():
+        #     if index == 0:
+        #         print(row)
         # generate new df, by sum of adults, children, babies, total special request
 
         # add weekday, weekend column
 
         # return new df
+        df_multiday = df_train[df_train["total_days"] > 1]
+        df_train = df_train[df_train["total_days"] == 1]
+        df_multiday = df_multiday.rename(columns={"arrival_date_year":"year", "arrival_date_month":"month", "arrival_date_day_of_month":"day"})
+        df_train = df_train.rename(columns={"arrival_date_year":"year", "arrival_date_month":"month", "arrival_date_day_of_month":"day"})
+        df_multiday["date"] = pd.to_datetime(df_multiday[["year","month","day"]])
+        df_train["date"] = pd.to_datetime(df_train[["year","month","day"]])
+        print(df_multiday)
+        df_temp = pd.DataFrame(columns=["adults", "children", "babies", "total_of_special_requests", "total_days", "date"])
+        for idx, row in df_multiday.iterrows():
+            for d in range(row["total_days"]):
+                r = row
+                r.at["date"] = row["date"] + timedelta(days=d)
+                # print(r)
+                df_temp.append(r)
+        print(df_temp)
+        
 
 def processData(train,test,notinclude,drop_canceled,notoneHot):
     df = DataReader(train,test,notinclude,drop_canceled,notoneHot)
