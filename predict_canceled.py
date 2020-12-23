@@ -86,8 +86,8 @@ class DataReader(object):
         # return new df
         df_train = df_train.rename(columns={"arrival_date_year":"year", "arrival_date_month":"month", "arrival_date_day_of_month":"day"})
         df_train["date"] = pd.to_datetime(df_train[["year","month","day"]])
-        df_train.drop(columns = ["year","month","day"])
-        print(df_train)
+        df_train = df_train.drop(columns = ["year","month","day"])
+        # print(df_train)
         df_temp = pd.DataFrame(columns=["adults","children","babies","total_of_special_requests","total_days","date"])
         for idx, row in df_train.iterrows():
             if row["total_days"] > 1:
@@ -96,7 +96,13 @@ class DataReader(object):
                     r.at["date"] = row["date"] + timedelta(days=d)
                     r.at["total_days"] = 1
                     df_temp = pd.concat([r.to_frame().transpose(), df_temp], ignore_index=True)
-        print(df_temp)
+        # print(df_temp)
+        df_temp = pd.concat([df_train[df_train["total_days"] == 1], df_temp], ignore_index=True).groupby(["date"]).sum().sort_values("date")
+        df_temp = df_temp.drop(columns = ["total_days"])
+        # print(df_temp)
+        df_temp.to_csv("df_train.csv")
+
+
         
 
 def processData(train,test,notinclude,drop_canceled,notoneHot):
