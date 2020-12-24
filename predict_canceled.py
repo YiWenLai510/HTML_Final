@@ -92,15 +92,16 @@ class DataReader(object):
         for idx, row in df_train.iterrows():
             if row["total_days"] > 1:
                 for d in range(row["total_days"]):
-                    r = row
-                    r.at["date"] = row["date"] + timedelta(days=d)
-                    r.at["total_days"] = 1
+                    r = row.copy()
+                    r["date"] = row["date"] + timedelta(days=d)
+                    r["total_days"] = 1
                     df_temp = pd.concat([r.to_frame().transpose(), df_temp], ignore_index=True)
         # print(df_temp)
+        df_temp = df_temp[df_temp["date"] < pd.to_datetime("2017-04-1")]
         df_temp = pd.concat([df_train[df_train["total_days"] == 1], df_temp], ignore_index=True).groupby(["date"]).sum().sort_values("date")
         df_temp = df_temp.drop(columns = ["total_days"])
-        # print(df_temp)
-        df_temp.to_csv("df_train.csv")
+        df_temp.to_csv("df_temp.csv")
+        print(df_temp)
 
 
         
