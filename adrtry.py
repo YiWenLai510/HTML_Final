@@ -8,7 +8,9 @@ from sklearn.decomposition import PCA
 
 if __name__ == "__main__":
     feature = pd.read_csv("train.csv").fillna(value = 0).rename(columns={"arrival_date_year":"year", "arrival_date_month":"month", "arrival_date_day_of_month":"day"})
+    # tfeature = pd.read_csv("train.csv").fillna(value = 0).rename(columns={"arrival_date_year":"year", "arrival_date_month":"month", "arrival_date_day_of_month":"day"})
     feature = feature[feature["is_canceled"] == 0]
+    # 58771
     feature["hotel"].replace({"Resort Hotel":2,"City Hotel":1}, inplace=True)
     # feature["month"].replace({'January':1,
     #                            'February':2,
@@ -39,23 +41,23 @@ if __name__ == "__main__":
         feature = pd.concat([feature.reset_index(drop=True), binaryFeature.reset_index(drop=True)], axis=1).drop([f], axis=1)
     # print(feature)
     
-    # adrLabel = feature["adr"] * feature["days"]
-    # # print(adrLabel)
-    # adrFeature = feature.drop(columns=["adr","days"], axis=1)
-    # # print(adrFeature)
+    adrLabel = feature["adr"] * feature["days"]
+    # print(adrLabel)
+    adrFeature = feature.drop(columns=["adr","days"], axis=1)
+    # print(adrFeature)
 
-    # pca = PCA(n_components=85).fit(adrFeature) 
-    # adrFeature = pca.transform(adrFeature)
+    pca = PCA(n_components=85).fit(adrFeature) 
+    adrFeature = pca.transform(adrFeature)
 
-    # model = make_pipeline(PolynomialFeatures(2), LinearRegression()).fit(adrFeature, adrLabel)
+    model = make_pipeline(PolynomialFeatures(2), LinearRegression()).fit(adrFeature, adrLabel)
+    _predict = model.predict(adrFeature)
+
+    # 80 2
+
+    # model = LinearRegression().fit(adrFeature, adrLabel)
+    # print(model.score(adrFeature, adrLabel))
     # _predict = model.predict(adrFeature)
 
-    # # 80 2
-
-    # # model = LinearRegression().fit(adrFeature, adrLabel)
-    # # print(model.score(adrFeature, adrLabel))
-    # # _predict = model.predict(adrFeature)
-
-    # print((_predict-adrLabel).abs().mean())
-    # # dump(model, 'model.joblib')
+    print((_predict-adrLabel).abs().mean())
+    # dump(model, 'model.joblib')
 
