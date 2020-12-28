@@ -46,7 +46,7 @@ class DataReader(object):
         # print("encode",encode_col)
         # one hot encoder
         self.readytoTrain = pd.get_dummies(tmp_combined, columns=encode_col)
-        # print(self.readytoTrain)
+        print(self.readytoTrain)
     def combined(self):
         # remove tags in train but not in test
         # not_include = ['ID', 'is_canceled','adr' ,'reservation_status' ,'reservation_status_date']
@@ -71,6 +71,7 @@ class DataReader(object):
         tmp_combined["desired_room"] = (tmp_combined["reserved_room_type"] == tmp_combined["assigned_room_type"])
         tmp_combined["days"] = tmp_combined["stays_in_weekend_nights"] + tmp_combined["stays_in_week_nights"]
         tmp_combined["date"] = pd.to_datetime(tmp_combined[["year", "month", "day"]])
+        tmp_combined = tmp_combined.drop(columns=["year", "month", "day"])
         return tmp_combined
 
 
