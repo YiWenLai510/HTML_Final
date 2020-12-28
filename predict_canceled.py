@@ -106,7 +106,7 @@ class DataReader(object):
 
         
 
-def prgit pulocessData(train,test,notinclude,drop_canceled,notoneHot):
+def processData(train,test,notinclude,drop_canceled,notoneHot):
     df = DataReader(train,test,notinclude,drop_canceled,notoneHot)
     train_y,train_x,test_x  = df.getTrainTest_svm()
     return train_y,train_x,test_x,df
