@@ -14,10 +14,10 @@ from sklearn.ensemble import AdaBoostRegressor, RandomForestRegressor, BaggingRe
 if __name__ == "__main__":
     feature = pd.read_csv("train.csv").fillna(value = 0).rename(columns={"arrival_date_year":"year", "arrival_date_month":"month", "arrival_date_day_of_month":"day"})
     testFeature = pd.read_csv("test.csv").fillna(value = 0).rename(columns={"arrival_date_year":"year", "arrival_date_month":"month", "arrival_date_day_of_month":"day"})
-    testCanceled = np.loadtxt("testCanceled.txt").transpose()
+    testCanceled = pd.read_csv("cancel.csv")
     # print(testCanceled)
-    testFeature["is_canceled"] = testCanceled
-    # print(testFeature)
+    testFeature["is_canceled"] = testCanceled["is_canceled"]
+    print(testFeature)
     feature = pd.concat([feature,testFeature], ignore_index=True)
     print(feature)
     feature = feature[feature["is_canceled"] == 0]
@@ -70,11 +70,11 @@ if __name__ == "__main__":
     # model = SVR().fit(adrFeature, adrLabel)
     # 0.776316
 
-    # model = KNeighborsRegressor(n_neighbors=10).fit(adrFeature, adrLabel)
+    model = KNeighborsRegressor(n_neighbors=10).fit(adrFeature, adrLabel)
     # 0.486842
 
-    model = MLPRegressor(max_iter=500).fit(adrFeature, adrLabel)
-    0.486842
+    # model = MLPRegressor(max_iter=500).fit(adrFeature, adrLabel)
+    # 0.486842
 
     # model = AdaBoostRegressor(n_estimators=100).fit(adrFeature, adrLabel)
     # 0.736842
