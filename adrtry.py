@@ -10,6 +10,9 @@ from sklearn.svm import SVR
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import AdaBoostRegressor, RandomForestRegressor, BaggingRegressor
+from keras.layers import Dense, Activation
+from keras.models import Sequential
+from sklearn.preprocessing import StandardScaler
 
 if __name__ == "__main__":
     feature = pd.read_csv("train.csv").fillna(value = 0).rename(columns={"arrival_date_year":"year", "arrival_date_month":"month", "arrival_date_day_of_month":"day"})
@@ -70,7 +73,7 @@ if __name__ == "__main__":
     # model = SVR().fit(adrFeature, adrLabel)
     # 0.776316
 
-    model = KNeighborsRegressor(n_neighbors=10).fit(adrFeature, adrLabel)
+    # model = KNeighborsRegressor(n_neighbors=10).fit(adrFeature, adrLabel)
     # 0.486842
 
     # model = MLPRegressor(max_iter=500).fit(adrFeature, adrLabel)
