@@ -1,29 +1,92 @@
 import pandas as pd
 import numpy as np
-trainRow = pd.read_csv('train.csv')
-trainRow = trainRow[trainRow.is_canceled != 1].drop(['is_canceled'], axis=1)
-trainRow['adr_days'] = trainRow.adr*(trainRow.stays_in_weekend_nights + trainRow.stays_in_week_nights)
-month_dict = {  'January':1,
-                        'February':2,
-                        'March':3,
-                        'April':4,
-                        'May':5,
-                        'June':6,
-                        'July':7,
-                        'August':8,
-                        'September':9,
-                        'October':10,
-                        'November':11,
-                        'December':12	}
-trainRow =  trainRow.replace({'arrival_date_month':month_dict})
-trainRow = trainRow.rename(columns={"arrival_date_year":"year", "arrival_date_month":"month", "arrival_date_day_of_month":"day"})
-trainRow["date"] = pd.to_datetime(trainRow[["year","month","day"]])
-# print(trainRow)
-df_tmp = trainRow[['adr_days','date']]
-print(df_tmp)
-d = df_tmp.groupby(["date"]).sum().sort_values("date")
-print(d)
-trainLabel = pd.read_csv('train_label.csv')
-print(trainLabel)
-d['label'] = trainLabel['label'].values
-print(d)
+from sklearn.preprocessing import LabelBinarizer, PolynomialFeatures
+# from time import sleep
+from sklearn.linear_model import LinearRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.decomposition import PCA
+from joblib import dump, load
+from sklearn.svm import SVR
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.neural_network import MLPRegressor
+from sklearn.metrics import mean_squared_error
+import lightgbm as lgb
+
+def lightgbm(y, x, test_x):
+    # preprocess data
+    x = np.array(x).astype(float)
+    y = np.array(y).astype(float)
+    test_x = np.array(test_x).astype(float)
+    index_list = np.arange(x.shape[0])
+    np.random.shuffle(index_list)
+    unit_len = int(x.shape[0]/5)
+    total_data = lgb.Dataset(x, label=y)
+    train_data = lgb.Dataset(x[index_list[unit_len:]], label=y[index_list[unit_len:]])
+    validation_data = lgb.Dataset(x[index_list[:unit_len]], label=y[index_list[:unit_len]])
+
+    print('test')
+    print(x.shape)
+    print(y.shape)
+    params = {
+    'boosting_type': 'gbdt', 
+    'objective': 'regression', 
+    'n_estimators': 3000,
+    'learning_rate': 0.5, 
+    'num_leaves': 60, 
+    'max_depth': 10,
+    'reg_lambda': 0,
+    }
+    params['metric'] = 'rmse'
+    bst = lgb.train(params, train_data, valid_sets=[validation_data], early_stopping_rounds=50)
+    y_pred = bst.predict(test_x, num_iteration=bst.best_iteration)
+
+    return y_pred
+
+def predict_adr(df):
+
+    drop = ["stays_in_weekend_nights", "stays_in_week_nights","date", "reserved_room_type"]
+    toEncode = ["country", "market_segment", "distribution_channel", "assigned_room_type", "agent", "company",
+                "customer_type","hotel", "meal", "deposit_type"]
+    df.read_drop_encode(drop, toEncode, [])
+    df.drop_encode()
+
+    adrLabel, adrFeature, testf = df.getTrainTest_adr_pd()
+    print(adrLabel.shape)
+    print(adrFeature.shape)
+    print(testf.shape)
+    # print(adrFeature)
+
+    # pca = PCA(n_components=85).fit(adrFeature)
+    # adrFeature = pca.transform(adrFeature)
+
+    # model = make_pipeline(PolynomialFeatures(2), LinearRegression()).fit(adrFeature, adrLabel)
+    # 1.539474
+
+    # model = LinearRegression().fit(adrFeature, adrLabel)
+    # 0.618421
+
+    # model = SVR().fit(adrFeature, adrLabel)
+    # 0.776316
+
+    # model = MLPRegressor(max_iter=500).fit(adrFeature, adrLabel)
+    # 0.486842
+
+    # print(model.score(adrFeature, adrLabel))
+    # _predict = model.predict(adrFeature)
+
+    # print((_predict-adrLabel).abs().mean())
+    # dump(model, 'sklearn_adr_KNR')
+    # model = load('sklearn_adr_KNR')
+    # print('score', model.score(adrFeature, adrLabel))
+    # testf = test.drop(columns=["adr", "days", "date"], axis=1)
+    #test_pca = pca.transform(testf)
+
+    model = KNeighborsRegressor(n_neighbors=10).fit(adrFeature, adrLabel)
+    # 0.486842
+    dump(model, 'sklearn_adr_KNR')
+    print('score', model.score(adrFeature, adrLabel))
+    return model.predict(testf)
+
+    # y_pred = lightgbm(adrLabel, adrFeature, testf)
+    # return y_pred
+
