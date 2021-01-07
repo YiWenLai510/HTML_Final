@@ -5,10 +5,18 @@ class DataReader(object):
         self.trainRow = pd.read_csv(trainFile).fillna(value=0).rename(columns={"arrival_date_year": "year", "arrival_date_month": "month", "arrival_date_day_of_month": "day"})
         
         # drop the negative adr
-        self.trainRow = self.trainRow[self.trainRow['adr'] >= 0]
+        self.trainRow = self.trainRow[self.trainRow['adr'] > 0]
+        # drop stay 0 nights
+        self.trainRow = self.trainRow[(self.trainRow['stays_in_weekend_nights'] != 0) | (self.trainRow['stays_in_week_nights'] != 0)]
+        # drop 0 people
+        self.trainRow = self.trainRow[(self.trainRow['adults'] != 0) | (self.trainRow['children'] != 0) | (self.trainRow['babies'] != 0)]
+        
+        print(self.trainRow)
+        print(self.trainRow[(self.trainRow['adults'] == 0) & (self.trainRow['children'] == 0) & (self.trainRow['babies'] == 0)])
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         # print('trainRow before', self.trainRow)
         # print('trainRow after', self.trainRow_adr)    
-        #     
+        
         self.train_cancel = self.trainRow['is_canceled']
         self.train_adr = self.trainRow['adr']
         self.testRow = pd.read_csv(testFile).fillna(value=0).rename(columns={"arrival_date_year": "year", "arrival_date_month": "month", "arrival_date_day_of_month": "day"})
@@ -63,9 +71,9 @@ class DataReader(object):
         # combine train and test
         tmp_combined = pd.concat([tmp_train, tmp_test])
         # # z-score normalization (lead_time)
-        # mu = self.readytoTrain['lead_time'].mean()
-        # std = self.readytoTrain['lead_time'].std()
-        # self.readytoTrain['lead_time'] = (self.readytoTrain['lead_time'] - mu) / std
+        # mu = tmp_combined['lead_time'].mean()
+        # std = tmp_combined['lead_time'].std()
+        # tmp_combined['lead_time'] = (tmp_combined['lead_time'] - mu) / std
 
         tmp_combined['month'].replace({   'January': 1,
                                           'February': 2,
