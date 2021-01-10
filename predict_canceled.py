@@ -6,7 +6,7 @@ from datetime import timedelta
 from data import DataReader
 from sklearn import svm
 from sklearn.metrics import accuracy_score
-from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
 from joblib import dump, load
 from sklearn.model_selection import GridSearchCV
@@ -19,6 +19,7 @@ def sklearn(y,x,test_x):
     # clf = svm.SVC()
 
     clf = AdaBoostClassifier(n_estimators=120, random_state=0)
+    # clf = GradientBoostingClassifier(n_estimators=125, random_state=0)
     # 0.8365253302159924  656 columns
     # 0.8547595896472233 1168 columns
     # clf = AdaBoostClassifier(DecisionTreeClassifier(max_depth=1),algorithm="SAMME",n_estimators=200)
@@ -119,7 +120,7 @@ def predict_canceled():
     # should be preserved not be encode
     notoneHot = ['lead_time',  'adults', 'children', 'babies', 'days', 'total_of_special_requests']
     # redunancy info for predict canceled
-    drop_canceled = ['agent', 'country', 'arrival_date_week_number','stays_in_weekend_nights', 'stays_in_week_nights','date']
+    drop_canceled = ['agent', 'country', 'stays_in_weekend_nights', 'stays_in_week_nights', 'date']
 
     df = DataReader('train.csv', 'test.csv', notinclude, drop_canceled, notoneHot, [])
     df.drop_encode()

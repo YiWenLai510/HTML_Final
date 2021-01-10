@@ -30,19 +30,19 @@ def lightgbm(y, x, test_x):
     params = {
     'boosting_type': 'gbdt', 
     'objective': 'regression', 
-    'n_estimators': 3000,
-    'learning_rate': 0.5, 
-    'num_leaves': 60, 
-    'max_depth': 10,
+    'n_estimators': 120,
+    'learning_rate': 0.1, 
+    'num_leaves': 31, 
+    'max_depth': 6,
     'reg_lambda': 0,
     }
     params['metric'] = 'rmse'
-    bst = lgb.train(params, train_data, valid_sets=[validation_data], early_stopping_rounds=50)
+    bst = lgb.train(params, train_data, valid_sets=[validation_data], early_stopping_rounds=5)
     y_pred = bst.predict(test_x, num_iteration=bst.best_iteration)
 
     return y_pred
 
-def predict_adr(df):
+def predict_adr(df, n_neighbors):  # add neighbor param
 
     drop = ["stays_in_weekend_nights", "stays_in_week_nights","date", "reserved_room_type"]
     toEncode = ["country", "market_segment", "distribution_channel", "assigned_room_type", "agent", "company",
@@ -81,7 +81,7 @@ def predict_adr(df):
     # testf = test.drop(columns=["adr", "days", "date"], axis=1)
     #test_pca = pca.transform(testf)
 
-    model = KNeighborsRegressor(n_neighbors=10).fit(adrFeature, adrLabel)
+    model = KNeighborsRegressor(n_neighbors=n_neighbors).fit(adrFeature, adrLabel)
     # 0.486842
     dump(model, 'sklearn_adr_KNR')
     print('score', model.score(adrFeature, adrLabel))
