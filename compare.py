@@ -1,7 +1,7 @@
 import pandas as pd
 
 result_best = pd.read_csv('result_best.csv')
-result = pd.read_csv('begging_result.csv')
+result = pd.read_csv('bagging_result.csv')
 
 label = result['label'].tolist()
 label_best = result_best['label'].tolist()

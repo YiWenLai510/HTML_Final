@@ -53,4 +53,4 @@ if __name__ == '__main__':
         blank_label.loc[blank_label.label < 0, ["label"]] = 0
         print(blank_label)
 
-        blank_label.to_csv('result_begging_{}.csv'.format(neighbor[i]),index=False)
+        blank_label.to_csv('result_bagging_{}.csv'.format(neighbor[i]),index=False)
